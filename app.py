@@ -22,8 +22,12 @@ class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     item = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(50), nullable=False, default="Other")
     date = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
+    
 
 with app.app_context():
     db.create_all()
@@ -123,9 +127,12 @@ def add_expense():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    new_ex = Expense(item=request.form['item'], 
-                     amount=float(request.form['amount']), 
-                     user_id=session['user_id'])
+    new_ex = Expense(
+        item=request.form['item'], 
+        amount=float(request.form['amount']), 
+        category=request.form['category'], # <--- This is the important line!
+        user_id=session['user_id']
+    )
     db.session.add(new_ex)
     db.session.commit()
     return redirect(url_for('index'))
